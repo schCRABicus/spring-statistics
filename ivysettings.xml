@@ -1,0 +1,42 @@
+<ivysettings >
+
+    <property name="spring.version" value="3.1.2.RELEASE" />
+    <property name="slf4j.version" value="1.6.1" />
+    <property name="apache.tiles.version" value="2.2.2" />
+
+    <property name="ivy-local-pattern"
+              value="${user.home}/.ivy2/local/repository/[organisation]/[module]/[revision]/[module]-[revision](-[classifier]).[ext]"
+              override="false" />
+    <property name="ivy-shared-pattern"
+              value="${user.home}/.ivy2/shared/repository/[organisation]/[module]/[revision]/[module]-[revision](-[classifier]).[ext]"
+              override="false" />
+
+    <settings defaultResolver="default-chain-resolver" />
+
+    <include url="${ivy.default.settings.dir}/ivysettings-public.xml" />
+    <include url="${ivy.default.settings.dir}/ivysettings-shared.xml" />
+    <include url="${ivy.default.settings.dir}/ivysettings-local.xml" />
+    <include url="${ivy.default.settings.dir}/ivysettings-main-chain.xml" />
+    <include url="${ivy.default.settings.dir}/ivysettings-default-chain.xml" />
+
+    <resolvers>
+
+        <chain name="default-chain-resolver">
+
+            <filesystem name="local-ivy2" m2compatible="true">
+                <artifact pattern="${ivy-local-pattern}" />
+                <ivy pattern="${ivy-local-pattern}" />
+            </filesystem>
+
+            <filesystem name="shared-ivy2" m2compatible="true">
+                <artifact pattern="${ivy-shared-pattern}" />
+                <ivy pattern="${ivy-shared-pattern}" />
+            </filesystem>
+
+            <ibiblio name="central" m2compatible="true" />
+
+        </chain>
+
+    </resolvers>
+
+</ivysettings>

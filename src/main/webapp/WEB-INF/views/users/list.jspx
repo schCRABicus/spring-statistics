@@ -1,0 +1,78 @@
+<section xmlns:jsp="http://java.sun.com/JSP/Page"
+         xmlns:c="http://java.sun.com/jsp/jstl/core"
+         xmlns:joda="http://www.joda.org/joda/time/tags"
+         version="2.0" xmlns:spring="http://www.springframework.org/tags">
+
+    <jsp:directive.page contentType="text/html;charset=UTF-8" pageEncoding="UTF-8"/>
+    <jsp:output omit-xml-declaration="yes"/>
+
+    <spring:message code="users_list_firstName" var="usersListFirstName" />
+    <spring:message code="users_list_lastName" var="usersListLastName" />
+    <spring:message code="users_list_birthDate" var="usersListBirthDate" />
+    <spring:message code="users_listing" var="usersListing" />
+
+    <spring:url value="/resources/js/jquery/jquery.jqGrid.min.js" var="jquery_grid_js_url" />
+    <spring:url value="/resources/js/jquery/i18n/grid.locale-en.js" var="jquery_grid_locale_js_url" />
+    <spring:url value="/resources/css/ui.jqgrid.css" var="jquery_grid_css_url" />
+    <spring:url value="/users/" var="showUsersUrl"/>
+
+    <script type="text/javascript" src="${jquery_grid_locale_js_url}"><jsp:text /></script>
+    <script type="text/javascript" src="${jquery_grid_js_url}"><jsp:text /></script>
+
+    <link ref="stylesheet" href="${jquery_grid_css_url}" />
+
+    <script type="text/javascript">
+        $(function(){
+            $("#list").jqGrid({
+                url:'${showUsersUrl}/listgrid',
+                datatype: 'json',
+                mtype: 'GET',
+                colNames:['${usersListFirstName}', '${usersListLastName}',
+                    '${usersListBirthDate}'],
+                colModel :[
+                    {name:'firstName', index:'firstName', width:150},
+                    {name:'lastName', index:'lastName', width:100},
+                    {name:'birthDateString', index:'birthDate', width:100}
+                ],
+                jsonReader : {
+                    root:"contactData",
+                    page: "currentPage",
+                    total: "totalPages",
+                    records: "totalRecords",
+                    repeatitems: false,
+                    id: "id"
+                },
+                pager: '#pager',
+                rowNum:10,
+                rowList:[10,20,30],
+                sortname: 'firstName',
+                sortorder: 'asc',
+                viewrecords: true,
+                gridview: true,
+                height: 250,
+                width: 500,
+                caption: '${usersListing}',
+                onSelectRow: function(id){
+                    document.location.href ="${showUsersUrl}/" + id;
+                }
+            });
+        });
+    </script>
+
+    <h1>${contactsListing}</h1>
+
+    <c:if test="${not empty message}">
+        <div id="message" class="${message.type}">${message.message}</div>
+    </c:if>
+
+    <h2>${labelContactList}</h2>
+    <div>
+        <table id="list">
+            <tr>
+                <td/>
+            </tr>
+        </table>
+    </div>
+    <div id="pager"></div>
+
+</section>

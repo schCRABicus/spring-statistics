@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd">
+
+    <import resource="spring-test-datasource.xml" />
+
+    <context:annotation-config />
+    <context:component-scan base-package="com.gmail.schcrabicus.spring.stats" />
+
+    <util:properties id="applicationProperties" location="application.properties" />
+    <!--<context:property-placeholder properties-ref="applicationProperties" />-->
+
+    <bean id="messageSource" class="org.springframework.context.support.ReloadableResourceBundleMessageSource">
+        <property name="defaultEncoding" value="UTF-8" />
+        <property name="basenames">
+            <list>
+                <value>/WEB-INF/i18n/validation</value>
+                <value>/WEB-INF/i18n/messages</value>
+            </list>
+        </property>
+    </bean>
+
+    <!-- Custom editors to support injecting of non-standard types -->
+    <bean id="customEditorConfigurer" class="org.springframework.beans.factory.config.CustomEditorConfigurer">
+        <property name="customEditors">
+            <map>
+                <entry key="org.joda.time.DateTime">
+                    <bean class="com.gmail.schcrabicus.spring.stats.util.propertyeditors.DateTimeEditor">
+                        <constructor-arg name="dateFormat" value="#{applicationProperties['date.pattern']}" />
+                        <constructor-arg name="allowEmpty" value="true" />
+                    </bean>
+                </entry>
+            </map>
+        </property>
+    </bean>
+
+</beans>

@@ -1,0 +1,134 @@
+<project name="spring-stats" basedir="." default="resolve" xmlns:ivy="antlib:org.apache.ivy.ant" >
+
+    <import file="tomcat-ant-tasks.xml" />
+    <property file="build.properties" />
+
+    <property name="war.name" value="${project.name}.war" />
+    <property name="war.file" value="${build.dir}/${build.war.dir}/${war.name}" />
+
+    <path id="compile.libraries">
+        <fileset dir="${lib.dir}/${lib.compile}">
+            <include name="**/*.jar" />
+        </fileset>
+    </path>
+
+    <path id="junit.libraries">
+        <fileset dir="${lib.dir}/${lib.compile}">
+            <include name="**/*.jar" />
+            <exclude name="**/javaee-web-api*.jar" />
+        </fileset>
+    </path>
+
+    <target name="resolve" description="--> resolves dependencies">
+        <ivy:settings file="ivysettings.xml" />
+        <ivy:resolve />
+        <ivy:retrieve pattern="${lib.dir}/[conf]/[type]s/[artifact]-[revision].[ext]" type="jar,bundle" sync="true"/>
+    </target>
+
+    <target name="clean" description="--> cleans directories">
+        <delete dir="${build.dir}" />
+    </target>
+
+    <target name="prepare" depends="clean" description="--> prepares build directories compiled sources to be placed in">
+        <mkdir dir="${build.dir}" />
+        <mkdir dir="${build.dir}/${build.src.dir}" />
+        <mkdir dir="${build.dir}/${build.war.dir}" />
+        <mkdir dir="${build.dir}/${build.test.dir}" />
+    </target>
+
+    <target name="compile" depends="resolve, prepare" description="--> compiles sources">
+        <javac srcdir="${src.dir}" destdir="${build.dir}/${build.src.dir}" debug="true" failonerror="true">
+            <classpath refid="compile.libraries" />
+        </javac>
+    </target>
+
+    <target name="compile-test" depends="resolve, prepare" description="--> compiles tests">
+        <javac srcdir="${src.dir}" destdir="${build.dir}/${build.test.dir}" debug="true" failonerror="true">
+            <classpath refid="compile.libraries" />
+        </javac>
+        <javac srcdir="${test.dir}" destdir="${build.dir}/${build.test.dir}" includeantruntime="true" nowarn="yes" debug="true">
+            <classpath refid="compile.libraries" />
+            <classpath refid="junit.libraries" />
+        </javac>
+    </target>
+
+    <target name="copy-test-resources" description="--> copies resources necessary to run junit tests">
+        <copy todir="${build.dir}/${build.test.dir}">
+            <fileset dir="${test.resources.dir}">
+                <include name="**/*.properties" />
+                <include name="**/*.xml" />
+            </fileset>
+            <fileset dir="${src.dir}">
+                <include name="**/*.properties" />
+                <include name="**/*.xml" />
+            </fileset>
+        </copy>
+    </target>
+
+    <target name="junit-tests-run" description="--> runs tests without source recompiling...">
+        <junit printsummary="on">
+            <classpath>
+                <pathelement location="${build.dir}/${build.test.dir}" />
+            </classpath>
+            <!--<classpath refid="compile.libraries" />-->
+            <classpath refid="junit.libraries" />
+            <batchtest>
+                <fileset dir="${build.dir}/${build.test.dir}">
+                    <include name="**/*Test*" />
+                    <exclude name="**/*Abstract*" />
+                </fileset>
+            </batchtest>
+            <formatter type="plain" usefile="false"/>
+        </junit>
+    </target>
+
+    <target name="junit-tests-rebuild-run" depends="compile-test, copy-test-resources, junit-tests-run" description="--> runs all junit tests">
+
+    </target>
+
+    <target name="makewar" description="--> makes war file">
+        <war destfile="${war.file}" webxml="${web.dir}/WEB-INF/web.xml">
+            <classes dir="${build.dir}/${build.src.dir}" />
+            <classes dir="${src.dir}" includes="**/*.properties, **/*.xml" />
+            <!--<classes dir="${src.resources.dir}" includes="**/*.*" excludes="META-INF/*.*"/>-->
+
+            <lib dir="${lib.dir}/${lib.runtime}/${lib.type.bundle}">
+                <include name="**/*.jar" />
+
+                <exclude name="**/*servlet-api*.jar" />
+                <exclude name="**/*jsp-api*.jar" />
+            </lib>
+
+            <lib dir="${lib.dir}/${lib.runtime}/${lib.type.jar}">
+                <include name="**/*.jar" />
+
+                <exclude name="**/*servlet-api*.jar" />
+                <exclude name="**/*jsp-api*.jar" />
+            </lib>
+
+            <zipfileset dir="${web.dir}/WEB-INF" prefix="WEB-INF" />
+            <zipfileset dir="${src.resources.dir}" />
+        </war>
+    </target>
+
+    <target name="rebuild-deploy" depends="compile, makewar" description="--> rebuilds project and deploys war archive to tomcat">
+        <antcall target="tomcat.tasks.deploy" inheritall="true" />
+    </target>
+
+    <target name="makewar-deploy" depends="makewar" description="--> makes war without recompiling and deploys it">
+        <antcall target="tomcat.tasks.deploy" inheritall="true" />
+    </target>
+
+    <target name="undeploy" description="--> undeploys project from tomcat server">
+        <antcall target="tomcat.tasks.undeploy" />
+    </target>
+
+    <target name="start-tomcat" description="--> starts tomcat">
+        <antcall target="tomcat.tasks.start" />
+    </target>
+
+    <target name="stop-tomcat" description="--> stops tomcat">
+        <antcall target="tomcat.tasks.stop" />
+    </target>
+
+</project>

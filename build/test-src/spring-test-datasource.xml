@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:jdbc="http://www.springframework.org/schema/jdbc"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xmlns:tx="http://www.springframework.org/schema/tx" xmlns:jpa="http://www.springframework.org/schema/data/jpa"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+           http://www.springframework.org/schema/beans/spring-beans.xsd
+           http://www.springframework.org/schema/jdbc
+           http://www.springframework.org/schema/jdbc/spring-jdbc.xsd
+           http://www.springframework.org/schema/util
+           http://www.springframework.org/schema/util/spring-util.xsd
+           http://www.springframework.org/schema/tx
+           http://www.springframework.org/schema/tx/spring-tx.xsd http://www.springframework.org/schema/data/jpa http://www.springframework.org/schema/data/jpa/spring-jpa.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
+
+
+
+    <!--<beans profile="h2, mysql">-->
+
+
+        <util:properties id="datasourceProperties" location="datasource.properties" />
+        <bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+            <property name="driverClassName" value="#{datasourceProperties['datasource.mysql.driver']}" />
+            <property name="url" value="#{datasourceProperties['datasource.mysql.test.url']}" />
+            <property name="username" value="#{datasourceProperties['datasource.mysql.username']}" />
+            <property name="password" value="#{datasourceProperties['datasource.mysql.password']}" />
+        </bean>
+
+        <bean id="emf" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
+            <property name="dataSource" ref="dataSource" />
+            <property name="jpaVendorAdapter">
+                <bean class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter" />
+            </property>
+            <property name="packagesToScan" value="com.gmail.schcrabicus.spring.stats.domain" />
+            <property name="jpaProperties">
+                <props>
+                    <prop key="hibernate.dialect">org.hibernate.dialect.MySQL5Dialect</prop>
+                    <prop key="hibernate.max_fetch_depth">3</prop>
+                    <prop key="hibernate.jdbc.fetch_size">50</prop>
+                    <prop key="hibernate.jdbc.batch_size">10</prop>
+                    <prop key="hibernate.show_sql">true</prop>
+                    <prop key="hibernate.hbm2ddl.auto">update</prop>
+                </props>
+            </property>
+        </bean>
+
+        <tx:annotation-driven transaction-manager="transactionManager" />
+
+        <bean id="transactionManager" class="org.springframework.orm.jpa.JpaTransactionManager">
+            <property name="entityManagerFactory" ref="emf" />
+            <property name="dataSource" ref="dataSource" />
+        </bean>
+
+        <jpa:repositories base-package="com.gmail.schcrabicus.spring.stats.repository" />
+
+
+</beans>
+
+<!--
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:jdbc="http://www.springframework.org/schema/jdbc"
+       xmlns:tx="http://www.springframework.org/schema/tx" xmlns:jpa="http://www.springframework.org/schema/data/jpa"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/jdbc http://www.springframework.org/schema/jdbc/spring-jdbc.xsd http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd http://www.springframework.org/schema/data/jpa http://www.springframework.org/schema/data/jpa/spring-jpa.xsd">
+
+    <beans profile="h2">
+        <jdbc:embedded-database id="dataSource" type="H2">
+            <jdbc:script location="/WEB-INF/data/schema.sql" />
+            <jdbc:script location="/WEB-INF/data/data.sql" />
+        </jdbc:embedded-database>
+    </beans>
+
+    <beans profile="mysql">
+        <bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+            <property name="driverClassName" value="com.mysql.jdbc.Driver" />
+            <property name="url" value="jdbc:mysql://localhost:3306/spring_stats" />
+            <property name="username" value="root" />
+            <property name="password" value="pass" />
+        </bean>
+    </beans>
+
+    <beans profile="h2,mysql">
+
+        <bean id="transactionManager" class="org.springframework.orm.jpa.JpaTransactionManager">
+            <property name="entityManagerFactory" ref="emf" />
+        </bean>
+
+        <tx:annotation-driven transaction-manager="transactionManager" />
+
+        <bean id="emf" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
+            <property name="dataSource" ref="dataSource" />
+            <property name="jpaVendorAdapter">
+                <bean class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter" />
+            </property>
+            <property name="packagesToScan" value="com.gmail.schcrabicus.spring.stats.domain" />
+            <property name="jpaProperties">
+                <props>
+                    <prop key="hibernate.dialect">
+                        org.hibernate.dialect.H2Dialect
+                    </prop>
+                    <prop key="hibernate.max_fetch_depth">3</prop>
+                    <prop key="hibernate.jdbc.fetch_size">50</prop>
+                    <prop key="hibernate.jdbc.batch_size">10</prop>
+                    <prop key="hibernate.show_sql">true</prop>
+                </props>
+            </property>
+        </bean>
+
+        <jpa:repositories base-package="com.gmail.schcrabicus.spring.stats.repository" />
+    </beans>
+</beans>-->

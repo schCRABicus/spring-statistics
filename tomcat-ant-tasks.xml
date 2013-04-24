@@ -1,0 +1,105 @@
+<project name="tomcat.tasks" basedir=".">
+
+    <property file="build.properties" />
+    <property file="tomcat.build.properties" />
+
+    <property environment="env" />
+    <property name="tomcat.home" value="${env.CATALINA_HOME}" />
+    <property name="tomcat.manager" value="${tomcat.base.url}/manager/text" />
+
+    <path id="tomcat.libraries.path">
+        <fileset dir="${tomcat.home}/lib">
+            <include name="catalina-ant.jar" />
+            <include name="tomcat-coyote.jar" />
+            <include name="tomcat-util.jar" />
+        </fileset>
+
+        <fileset dir="${tomcat.home}/bin">
+            <include name="bootstrap.jar" />
+            <include name="tomcat-juli.jar" />
+        </fileset>
+    </path>
+
+    <target name="check-tomcat-availability" description="--> checks tomcat presence">
+        <condition property="is-tomcat-available" >
+            <available file="${tomcat.home}" />
+        </condition>
+    </target>
+
+    <target name="check-deployed"
+            depends="check-tomcat-availability"
+            if="is-tomcat-available"
+            description="--> checks whether the specified project is deployed or not">
+        <condition property="is-project-deployed">
+            <http url="${tomcat.base.url}/${project.name}" />
+        </condition>
+    </target>
+
+    <target name="define-tomcat-native-tasks"
+            depends="check-tomcat-availability"
+            if="is-tomcat-available"
+            description="--> defines basic native tomcat tasks">
+        <taskdef name="start" classname="org.apache.catalina.ant.StartTask" classpathref="tomcat.libraries.path" />
+        <taskdef name="stop" classname="org.apache.catalina.ant.StopTask" classpathref="tomcat.libraries.path" />
+        <taskdef name="deploy" classname="org.apache.catalina.ant.DeployTask" classpathref="tomcat.libraries.path" />
+        <taskdef name="undeploy" classname="org.apache.catalina.ant.UndeployTask" classpathref="tomcat.libraries.path" />
+    </target>
+
+    <target name="undeploy" depends="check-deployed, define-tomcat-native-tasks" if="is-project-deployed">
+        <undeploy
+            url="${tomcat.manager}"
+            username="${tomcat.username}"
+            password="${tomcat.password}"
+            path="/${project.name}"
+            failonerror="true" />
+    </target>
+
+    <target name="deploy" depends="check-tomcat-availability, undeploy, define-tomcat-native-tasks" if="is-tomcat-available">
+        <deploy
+            url="${tomcat.manager}"
+            username="${tomcat.username}"
+            password="${tomcat.password}"
+            path="/${project.name}"
+            war="${war.file}"
+            update="true" />
+    </target>
+
+    <target name="start" depends="check-tomcat-availability" if="is-tomcat-available"
+            description="--> starts tomcat">
+        <java classname="org.apache.catalina.startup.Bootstrap" failonerror="true" fork="true">
+
+            <classpath path="${tomcat.home}/bin/bootstrap.jar:${tomcat.home}/bin/tomcat-juli.jar" />
+
+            <jvmarg value="-Djava.util.logging.manager=org.apache.juli.ClassLoaderLogManager" />
+            <jvmarg value="-Djava.util.logging.config.file=${tomcat.home}/conf/logging.properties" />
+
+            <jvmarg value="-Dcatalina.home=${tomcat.home}" />
+            <jvmarg value="-Dcatalina.base=${tomcat.home}" />
+
+            <jvmarg value="-Djava.io.tmpdir=${tomcat.home}/temp" />
+            <jvmarg value="-Djava.awt.headless=true
+                        -Dfile.encoding=UTF-8
+                        -server
+                        -Xms256m
+                        -Xmx512m
+                        -XX:NewSize=256m
+                        -XX:MaxNewSize=256m
+                        -XX:PermSize=256m
+                        -XX:MaxPermSize=256m
+                        -XX:+DisableExplicitGC" />
+
+            <arg line="start" />
+        </java>
+    </target>
+
+    <target name="stop" depends="check-tomcat-availability" if="is-tomcat-available">
+        <java classname="org.apache.catalina.startup.Bootstrap" fork="true" failonerror="true">
+            <classpath path="${tomcat.home}/bin/bootstrap.jar:${tomcat.home}/bin/tomcat-juli.jar" />
+
+            <jvmarg value="-Dcatalina.home=${tomcat.home}" />
+
+            <arg line="stop" />
+        </java>
+    </target>
+
+</project>
