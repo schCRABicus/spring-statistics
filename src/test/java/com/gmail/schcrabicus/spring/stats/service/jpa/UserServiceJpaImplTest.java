@@ -13,11 +13,11 @@ import org.springframework.test.annotation.Rollback;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.validation.ConstraintViolationException;
-import java.util.HashSet;
-import java.util.List;
+import java.util.*;
 
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNotNull;
+import static junit.framework.Assert.assertNull;
 
 
 /**
@@ -48,6 +48,18 @@ public class UserServiceJpaImplTest extends AbstractServiceJpaImplTest {
 
     @Value("#{applicationProperties['default.user.admin.birthdate']}")
     private DateTime defaultUserBirthDate;
+
+    private static Map<String, String> defaultUserCredentials = new HashMap<String, String>();
+
+    static {
+        defaultUserCredentials.put( "correctLogin" , "Login" );
+        defaultUserCredentials.put( "correctPassword" , "Password" );
+        defaultUserCredentials.put( "shortLogin" , "Me" );
+        defaultUserCredentials.put( "shortPassword" , "Pass" );
+        defaultUserCredentials.put( "firstName" , "Quality" );
+        defaultUserCredentials.put( "updatedFirstName" , "SuperQuality" );
+        defaultUserCredentials.put( "lastName" , "Assurance" );
+    }
 
     @Autowired
     @Qualifier( "userServiceImpl" )
@@ -111,9 +123,7 @@ public class UserServiceJpaImplTest extends AbstractServiceJpaImplTest {
         if ( installDefaultUser ){
             user = userService.findByLogin( defaultUserLogin );
         } else {
-            User newUser = new User();
-            newUser.setLogin( "User_login" );
-            newUser.setPassword( "User_password" );
+            User newUser = getDefaultUser();
 
             userService.create( newUser );
             user = userService.findByLogin( "User_login" );
@@ -129,13 +139,7 @@ public class UserServiceJpaImplTest extends AbstractServiceJpaImplTest {
     @Transactional
     @Rollback
     public void testCreateUser() throws Exception{
-        User user = new User();
-
-        user.setFirstName( "User" );
-        user.setLastName( "Shmuser" );
-        user.setLogin( "zeliboba" );
-        user.setPassword( "crabby" );
-        user.setRoles( new HashSet<Role>() );
+        User user = getDefaultUser();
 
         Long id = userService.create( user ).getId();
 
@@ -168,9 +172,8 @@ public class UserServiceJpaImplTest extends AbstractServiceJpaImplTest {
     @Transactional
     @Rollback
     public void testCreateUserWithShortLoginSizeJSR303Error() throws Exception{
-        User user = new User();
-        user.setLogin( "me" );
-        user.setPassword( "perfect_password" );
+        User user = getDefaultUser();
+        user.setLogin(defaultUserCredentials.get("shortLogin"));
 
         userService.create( user );
 
@@ -185,13 +188,74 @@ public class UserServiceJpaImplTest extends AbstractServiceJpaImplTest {
     @Transactional
     @Rollback
     public void testCreateUserWithShortPasswordSizeJSR303Error() throws Exception{
-        User user = new User();
-        user.setLogin( "Perfect_login" );
-        user.setPassword( "I" );
+        User user = getDefaultUser();
+        user.setPassword( defaultUserCredentials.get( "shortPassword" ) );
 
         userService.create( user );
 
         List<User> users = userService.findAll();
         assertEquals( installDefaultUser ? 1 : 0 , users.size() );
+    }
+
+    /**
+     * Tests update functionality;
+     * @throws Exception
+     */
+    @Test
+    @Transactional
+    @Rollback
+    public void testUpdateUser() throws Exception{
+        User user = getDefaultUser();
+
+        user = userService.create( user );
+        user.setFirstName( defaultUserCredentials.get( "updatedFirstName" ));
+
+        User updatedUser = userService.update( user );
+
+        assertEquals( user.getId() , updatedUser.getId() );
+        assertEquals( defaultUserCredentials.get( "updatedFirstName" ) , updatedUser.getFirstName() );
+    }
+
+    /**
+     * Tests delete functionality;
+     *
+     * @throws Exception
+     */
+    @Test
+    @Transactional
+    @Rollback
+    public void testDeleteUser() throws Exception{
+        Long initialSize = userService.count();
+
+        User user = getDefaultUser();
+        userService.create( user );
+        User createdUser = userService.findById( user.getId() );
+
+        assertNotNull( createdUser );
+
+        userService.delete( user );
+        User removedUser = userService.findById( createdUser.getId() );
+
+        assertNull( removedUser );
+        Long finalSize = userService.count();
+
+        assertEquals( initialSize , finalSize );
+    }
+
+    /**
+     * Gets default user;
+     *
+     * @return User instance;
+     */
+    private static User getDefaultUser(){
+        User user = new User();
+
+        user.setLogin( defaultUserCredentials.get( "correctLogin" ));
+        user.setPassword( defaultUserCredentials.get( "correctPassword" ));
+        user.setFirstName( defaultUserCredentials.get( "firstName" ));
+        user.setLastName( defaultUserCredentials.get( "lastName" ));
+        user.setRoles( new HashSet<Role>());
+
+        return user;
     }
 }

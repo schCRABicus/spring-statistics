@@ -5,7 +5,7 @@
     <!-- root configuration, shared between all application contexts -->
     <context-param>
         <param-name>contextConfigLocation</param-name>
-        <param-value>/WEB-INF/spring/root/spring-root-config.xml</param-value>
+        <param-value>classpath*:spring/root/spring-root-config.xml</param-value>
     </context-param>
     
     <context-param>

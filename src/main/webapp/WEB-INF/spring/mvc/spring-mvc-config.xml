@@ -11,6 +11,17 @@
 
     <mvc:default-servlet-handler />
 
+    <!-- message source -->
+    <bean id="messageSource" class="org.springframework.context.support.ReloadableResourceBundleMessageSource">
+        <property name="defaultEncoding" value="UTF-8" />
+        <property name="basenames">
+            <list>
+                <value>/WEB-INF/i18n/validation</value>
+                <value>/WEB-INF/i18n/messages</value>
+            </list>
+        </property>
+    </bean>
+
     <!-- Adding validator -->
     <mvc:annotation-driven validator="validator" />
     <bean id="validator" class="org.springframework.validation.beanvalidation.LocalValidatorFactoryBean">

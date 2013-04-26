@@ -8,6 +8,11 @@
           <file>file://$MODULE_DIR$/src/main/webapp/WEB-INF/spring/mvc/spring-mvc-config.xml</file>
           <file>file://$MODULE_DIR$/src/main/webapp/WEB-INF/spring/root/spring-root-config.xml</file>
           <file>file://$MODULE_DIR$/src/main/webapp/WEB-INF/spring/mvc/spring-security-config.xml</file>
+          <file>file://$MODULE_DIR$/src/main/resources/spring/root/spring-datasource.xml</file>
+        </fileset>
+        <fileset id="fileset2" name="Spring Application Context (2)" removed="false">
+          <file>file://$MODULE_DIR$/src/main/resources/spring/root/spring-root-config.xml</file>
+          <file>file://$MODULE_DIR$/src/main/resources/spring/root/spring-datasource.xml</file>
         </fileset>
       </configuration>
     </facet>

@@ -16,9 +16,8 @@ import org.springframework.test.context.transaction.TransactionConfiguration;
  * To change this template use File | Settings | File Templates.
  */
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration( locations = {"classpath*:**/spring-test-root-config.xml"})/*( locations = {"classpath*:**//*spring-test-root-config.xml"})*/
-/*@ImportResource(value = "classpath*:**//*spring-test-datasource.xml")*/
+@ContextConfiguration( locations = {"classpath*:**/spring-root-config.xml"})
 @TransactionConfiguration(transactionManager = "transactionManager", defaultRollback = true )
-/*@ActiveProfiles( { "test,mysql" })*/
-public abstract class AbstractServiceJpaImplTest/* extends AbstractTransactionalJUnit4SpringContextTests*/ {
+@ActiveProfiles( profiles = { "test" , "mysql" } )
+public abstract class AbstractServiceJpaImplTest {
 }

@@ -54,7 +54,7 @@
 
     <target name="copy-test-resources" description="--> copies resources necessary to run junit tests">
         <copy todir="${build.dir}/${build.test.dir}">
-            <fileset dir="${test.resources.dir}">
+            <fileset dir="${src.resources.dir}">
                 <include name="**/*.properties" />
                 <include name="**/*.xml" />
             </fileset>
@@ -90,7 +90,7 @@
         <war destfile="${war.file}" webxml="${web.dir}/WEB-INF/web.xml">
             <classes dir="${build.dir}/${build.src.dir}" />
             <classes dir="${src.dir}" includes="**/*.properties, **/*.xml" />
-            <!--<classes dir="${src.resources.dir}" includes="**/*.*" excludes="META-INF/*.*"/>-->
+            <classes dir="${src.resources.dir}" includes="**/*.*" excludes="META-INF/*.*"/>
 
             <lib dir="${lib.dir}/${lib.runtime}/${lib.type.bundle}">
                 <include name="**/*.jar" />
@@ -107,7 +107,8 @@
             </lib>
 
             <zipfileset dir="${web.dir}/WEB-INF" prefix="WEB-INF" />
-            <zipfileset dir="${src.resources.dir}" />
+            <zipfileset dir="${web.dir}/resources" />
+            <!--<zipfileset dir="${src.resources.dir}" />-->
         </war>
     </target>
 

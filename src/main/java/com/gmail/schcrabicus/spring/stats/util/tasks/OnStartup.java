@@ -14,7 +14,9 @@ import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.annotation.Resource;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Set;
 
 /**
@@ -29,7 +31,8 @@ public class OnStartup implements ApplicationListener<ContextRefreshedEvent> {
 
     private static Logger log = Logger.getLogger(OnStartup.class);
 
-    private static final String[] ROLE_NAMES = new String[] { "ROLE_ADMIN" , "ROLE_USER" , "ROLE_MODERATOR" };
+    @Resource( name = "defaultRoles" )
+    private Set<String> defaultRoles;
 
     @Value("#{applicationProperties['default.install']}")
     private boolean installDefaultUser;
@@ -70,7 +73,8 @@ public class OnStartup implements ApplicationListener<ContextRefreshedEvent> {
 
         log.debug("checking roles presence...");
         Role role;
-        for ( String roleName : ROLE_NAMES ){
+
+        for ( String roleName : defaultRoles ){
             role = roleService.findByName( roleName );
             if ( role == null ){
                 role = new Role();
@@ -91,7 +95,7 @@ public class OnStartup implements ApplicationListener<ContextRefreshedEvent> {
                 user.setBirthDate( defaultUserBirthDate );
 
                 Set<Role> roles = new HashSet<Role>();
-                for ( String roleName : ROLE_NAMES){
+                for ( String roleName : defaultRoles ){
                     roles.add( roleService.findByName( roleName ));
                 }
 
